@@ -177,7 +177,7 @@ procedure TMyApplication.banner;
 var
   banners:string;
 begin
-  banners := '[*] threat intelligence IPs Check Tool '#10+
+  banners := '[*] threat intelligence IPs Check Tool (TIPC) '#10+
              '[+] Coded by : @zux0x3a '#10+
              '[!] https://0xsp.com'#10+
              '=========================';
@@ -186,11 +186,41 @@ begin
 
 end;
 
+procedure AddToOrIncrementInList(AList: TStrings; AValue: String);
+var
+  i: Integer;
+  S, RS, LS: String;
+  Counter: Longint;
+begin
+  for i := 0 to AList.Count - 1 do
+  begin
+    S := AList.Strings[i];
+    if (S = AValue) then
+    begin
+      S :=' * ' +AValue;
+      AList.Strings[i] := S;
+      Exit;
+    end;
+    RS := RightStr(S, Length(AValue));
+    LS := TrimRight(Copy(S, 1, Length(S) - Length(AValue)));
+    if (RS = AValue) and TryStrToInt(LS, Counter) then
+    begin
+      Inc(Counter);
+      S := IntToStr(Counter) + #32 + AValue;
+      AList.Strings[i] := S;
+      writeln(Alist.Count);
+      Exit;
+    end;
+  end;
+  //it's not in the list yet
+  AList.Add(AValue);
+end;
+
 procedure TMyApplication.checkip;
 var
  list:Tstringlist;
  blist:TstringList;
- res: string;
+ res,s: string;
  i,li,bi,fi:integer;
  flist:string;
  process : Tprocess;
@@ -199,6 +229,7 @@ var
  listout:Tstringlist;
  outy:string;
  c,ps:integer;
+ counter:longint;
 begin
 
   process := Tprocess.Create(nil);
@@ -235,9 +266,16 @@ end;
   for  ps:=0 to listout.Count -1 do begin
 
    outy := listout.Strings[ps];
+
    if AnsiContainsStr(outy,'.') then begin
 
+    s := list[li];
    writeln('[*] IP '+list[li],' is listed on '+blist[bi]);
+  // writeln(res);
+  // writeln(listout.Count);
+  AddToOrIncrementInList(list,s);
+ // writeln(s);
+
    end;
 
  end;
@@ -252,7 +290,7 @@ begin
   { add your help code here }
   writeln('Usage: ', ExeName, ' -h');
   writeln('-l ','--Load List of IPs from a file ');
-  writeln('-c ','--Check range of IPs for blacklist/spam');
+  writeln('-b ','--Check range of IPs for blacklist/spam');
   writeln('-m ','--Lookup for List of Ips through Daily Malicious Activity Database ');
   writeln('-i ','--Retrieve IP Location ');
 end;
